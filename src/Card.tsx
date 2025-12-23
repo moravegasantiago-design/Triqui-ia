@@ -1,4 +1,25 @@
+import { useState, type Dispatch, type SetStateAction } from "react";
+import { serializeBoard } from "./ia/seralizeBoard";
+import { miniMax } from "./ia/ia";
+export type Cell = "" | "X" | "O";
 export default function Card() {
+  const [turnPlayer, SetTurnPlayer] = useState(false);
+  const [board, SetBoard] = useState<Cell[][]>([
+    ["", "", ""],
+    ["", "", ""],
+    ["", "", ""],
+  ]);
+  if (turnPlayer) {
+    const tranformer = serializeBoard({ arrays: board });
+    const resIa = miniMax({ array: tranformer, shift: true });
+    SetBoard((count) => {
+      if (resIa.x === undefined || resIa.y === undefined) return count;
+      const copyCount = count.map((c) => [...c]);
+      copyCount[resIa.y][resIa.x] = "O";
+      return copyCount;
+    });
+    SetTurnPlayer(false);
+  }
   return (
     <div className="h-dvh bg-[#0a0a0f] text-white p-2 sm:p-4 flex items-center justify-center overflow-hidden">
       <div className="w-full max-w-sm sm:max-w-4xl h-full max-h-[100dvh] flex flex-col sm:flex-row gap-2 sm:gap-4">
@@ -6,10 +27,25 @@ export default function Card() {
         <div className="flex-1 flex flex-col gap-2 sm:gap-3 min-h-0">
           <HeaderCard />
           <div className="flex-1 flex items-center justify-center min-h-0">
-            <BoardCard />
+            <BoardCard
+              turnPlayer={turnPlayer}
+              SetTurnPlayer={SetTurnPlayer}
+              board={board}
+              SetBoard={SetBoard}
+            />
           </div>
           <MobileStatistics />
-          <button className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-violet-600 to-purple-600 rounded-xl font-semibold text-xs sm:text-sm hover:from-violet-500 hover:to-purple-500 active:scale-[0.98] transition-all shadow-lg shadow-violet-500/20">
+          <button
+            className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-violet-600 to-purple-600 rounded-xl font-semibold text-xs 
+          sm:text-sm hover:from-violet-500 hover:to-purple-500 active:scale-[0.98] transition-all shadow-lg shadow-violet-500/20"
+            onClick={() =>
+              SetBoard([
+                ["", "", ""],
+                ["", "", ""],
+                ["", "", ""],
+              ])
+            }
+          >
             Nueva Partida
           </button>
         </div>
@@ -46,20 +82,49 @@ const HeaderCard = () => {
     </div>
   );
 };
-const BoardCard = () => {
+type boardProps = {
+  turnPlayer: boolean;
+  SetTurnPlayer: Dispatch<SetStateAction<boolean>>;
+  board: Cell[][];
+  SetBoard: Dispatch<SetStateAction<Cell[][]>>;
+};
+const BoardCard = (props: boardProps) => {
+  const { turnPlayer, SetTurnPlayer, board, SetBoard } = props;
   const Xstyle = "text-pink-400 shadow-[0_0_20px_#f472b666]";
   const Ostyle = "text-emerald-400 shadow-[0_0_20px_#34d39966]";
+  const addOption = (props: { x: number; y: number }) => {
+    const { x, y } = props;
+    if (board[y][x] !== "") return;
+    SetBoard((count) => {
+      const cursor = turnPlayer ? "O" : "X";
+      const newBoard = count.map((a) => [...a]);
+      newBoard[y][x] = cursor;
+      return newBoard;
+    });
+    SetTurnPlayer((count) => !count);
+  };
   return (
     <div className="grid grid-cols-3 gap-2 sm:gap-3 p-2 sm:p-4 bg-[#12121a] rounded-2xl w-full max-w-[220px] sm:max-w-[280px] aspect-square">
-      <button className="aspect-square rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center bg-[#1a1a24] hover:bg-[#252532] active:scale-95 transition-all"></button>
-      <button className="aspect-square rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center bg-[#1a1a24] hover:bg-[#252532] active:scale-95 transition-all"></button>
-      <button className="aspect-square rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center bg-[#1a1a24] hover:bg-[#252532] active:scale-95 transition-all"></button>
-      <button className="aspect-square rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center bg-[#1a1a24] hover:bg-[#252532] active:scale-95 transition-all"></button>
-      <button className="aspect-square rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center bg-[#1a1a24] hover:bg-[#252532] active:scale-95 transition-all"></button>
-      <button className="aspect-square rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center bg-[#1a1a24] hover:bg-[#252532] active:scale-95 transition-all"></button>
-      <button className="aspect-square rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center bg-[#1a1a24] hover:bg-[#252532] active:scale-95 transition-all"></button>
-      <button className="aspect-square rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center bg-[#1a1a24] hover:bg-[#252532] active:scale-95 transition-all"></button>
-      <button className="aspect-square rounded-xl sm:rounded-2xl text-2xl sm:text-4xl font-extrabold flex items-center justify-center bg-[#1a1a24] hover:bg-[#252532] active:scale-95 transition-all"></button>
+      {board.map((a, y) => {
+        return a.map((p, x) => {
+          return (
+            <button
+              key={`${x}-${y}`}
+              className={`aspect-square rounded-xl sm:rounded-2xl 
+            text-2xl sm:text-4xl font-extrabold flex items-center justify-center bg-[#1a1a24] 
+            hover:bg-[#252532] active:scale-95 transition-all ${
+              (p === "O" && Ostyle) || (p === "X" && Xstyle)
+            }`}
+              onClick={() => {
+                if (turnPlayer) return;
+                addOption({ x: x, y: y });
+              }}
+            >
+              {p}
+            </button>
+          );
+        });
+      })}
     </div>
   );
 };
