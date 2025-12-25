@@ -1,6 +1,6 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { addOption } from "./game/playTurn";
-import { checkWinner } from "./game/isWinner";
+import { checkWinner } from "./game/statsController";
 export type Cell = "" | "X" | "O";
 export type gameStatusProps = {
     isWin: boolean; 
@@ -12,6 +12,7 @@ export type statisticsProps = {
     wins: number;
     losses:number;
     draw : number;
+    streak : number;
     gameHistory: ("W" | "L" | "D")[];
 }
 export default function Card() {
@@ -19,7 +20,7 @@ export default function Card() {
   const [gameStatus, setGameStatus] = useState<gameStatusProps>({isWin : false, winner: "none", isDraw: false })
   const [playerStatistics, setPlayerStatistics] = useState<statisticsProps>(() => {
     const saved = localStorage.getItem("playerStatistics")
-    if(!saved) return {points: 0, wins: 0, losses:0, draw : 0, gameHistory: []};
+    if(!saved) return {points: 0, wins: 0, losses:0, draw : 0, streak : 0, gameHistory: []};
     return JSON.parse(saved)
   });
   const [board, setBoard] = useState<Cell[][]>([
@@ -41,7 +42,7 @@ export default function Card() {
   return (
     <div className="h-dvh bg-[#0a0a0f] text-white p-2 sm:p-4 flex items-center justify-center overflow-hidden">
       <div className="w-full max-w-sm sm:max-w-4xl h-full max-h-[100dvh] flex flex-col sm:flex-row gap-2 sm:gap-4">
-        <DesktopBar gameHistory={playerStatistics.gameHistory}/>
+        <DesktopBar gameHistory={playerStatistics.gameHistory} streak={playerStatistics.streak}/>
         <div className="flex-1 flex flex-col gap-2 sm:gap-3 min-h-0">
           <HeaderCard wins={playerStatistics.wins} losser={playerStatistics.losses}/>
           <div className="flex-1 flex items-center justify-center min-h-0">
@@ -309,12 +310,12 @@ const DrawModal = (props : {setBoard: Dispatch<SetStateAction<Cell[][]>>, setGam
 };
 const MobileBar = (props : {playerStatistics: statisticsProps}) => {
     const {playerStatistics} = props;
-    const {wins, gameHistory, points} = playerStatistics
+    const {wins, gameHistory, points, streak} = playerStatistics
     const winRate = gameHistory.length ? Math.round((wins / gameHistory.length)*100):0
   return (
     <>
       <div className="flex-1 bg-[#1a1a24] rounded-xl p-2 text-center">
-        <p className="text-xl font-bold text-violet-400">3</p>
+        <p className="text-xl font-bold text-violet-400">{streak}</p>
         <p className="text-[7px] uppercase tracking-wider text-gray-500">
           Racha
         </p>
@@ -339,8 +340,10 @@ const MobileBar = (props : {playerStatistics: statisticsProps}) => {
     </>
   );
 };
-const DesktopBar = (props: {gameHistory : ("W" | "L" | "D")[]}) => {
-    const {gameHistory} = props
+const DesktopBar = (props: {gameHistory : ("W" | "L" | "D")[], streak: number}) => {
+    const {gameHistory, streak} = props;
+    const addListIndex = gameHistory.map((l, i) =>  [...[l, i+1], ])
+    const simplificarArray = addListIndex.length > 10 ? addListIndex.slice(addListIndex.length -10, addListIndex.length) : addListIndex;
   return (
     <div className="hidden sm:flex flex-col gap-3 w-48">
       <div className="bg-[#1a1a24] rounded-2xl p-4 flex-1">
@@ -348,21 +351,20 @@ const DesktopBar = (props: {gameHistory : ("W" | "L" | "D")[]}) => {
           Historial
         </p>
         <div className="flex flex-col gap-2">
-          {gameHistory.map((h, i) => {
-            return (<div  key={i} className="flex items-center justify-between bg-[#12121a] rounded-lg px-3 py-2">
-            <span className="text-xs text-gray-400">Jugada #{i+1}</span>
-            <span className={`${(h === "D" && "text-yellow-400") || (h === "W" ? "text-emerald-400" : "text-red-400")} 
-                font-bold text-sm`}>{h}</span>
+          {simplificarArray.map((h) => {
+            return (<div  key={h[1]} className="flex items-center justify-between bg-[#12121a] rounded-lg px-3 py-2">
+            <span className="text-xs text-gray-400">Jugada #{h[1]}</span>
+            <span className={`${(h[0] === "D" && "text-yellow-400") || (h[0] === "W" ? "text-emerald-400" : "text-red-400")} 
+                font-bold text-sm`}>{h[0]}</span>
           </div>)
           })}
         </div>
       </div>
-
       <div className="bg-[#1a1a24] rounded-2xl p-4 text-center">
         <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">
           Racha Actual
         </p>
-        <p className="text-4xl font-extrabold text-violet-400">3</p>
+        <p className="text-4xl font-extrabold text-violet-400">{streak}</p>
         <p className="text-[10px] text-gray-500">Victorias seguidas</p>
       </div>
     </div>
@@ -370,9 +372,10 @@ const DesktopBar = (props: {gameHistory : ("W" | "L" | "D")[]}) => {
 };
 const MobileHistory = (props: {gameHistory : ("W" | "L" | "D")[]}) => {
     const {gameHistory} = props
+    const simplificarArray = gameHistory.length > 10 ? gameHistory.slice(gameHistory.length -10, gameHistory.length) : gameHistory
   return (
     <div className="flex gap-1.5">
-    {gameHistory.map((h, i) => {
+    {simplificarArray.map((h, i) => {
         return (<div key = {`${h}-${i}`} className={`w-8 h-8 rounded-lg flex items-center justify-center 
         text-xs font-bold ${h === "W" &&  "bg-emerald-400/20 text-emerald-400" || h === "D" ? "bg-yellow-400/20 text-yellow-400" : "bg-red-400/20 text-red-400"}`}>
         {h}
