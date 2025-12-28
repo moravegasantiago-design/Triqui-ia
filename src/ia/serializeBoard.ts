@@ -1,4 +1,4 @@
-import { type Cell } from "../Card";
+import { type Cell } from "../type";
 export const serializeBoard = (props: { arrays: Cell[][] }) => {
   const { arrays } = props;
   const copyArray: number[][] = arrays.map(() => [0, 0, 0]);

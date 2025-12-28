@@ -1,16 +1,17 @@
 import evaluateBoard, { isCellEmpty } from "./evaluateBoard.ts";
-
 export const miniMax = (props: {
   array: number[][];
   shift: boolean;
   depth?: number;
+  mode: "impossible" | "medium";
 }) => {
-  const { array, shift, depth = 0 } = props;
-  const score = evaluateBoard({ array: array });
+  const { array, shift, mode, depth = 0 } = props;
+  const score = evaluateBoard({ array: array, mode: mode });
   if (score !== -1) {
     if (score === 10) return { score: 10 - depth };
     if (score === -10) return { score: -10 + depth };
-    if (typeof score === "object") return { score: 0, ...score };
+    if (typeof score === "object" && mode === "medium")
+      return { score: 0, ...score };
     return { score: 0 };
   }
   let bestScore = shift ? -Infinity : Infinity;
@@ -23,6 +24,7 @@ export const miniMax = (props: {
           array: array,
           shift: !shift,
           depth: depth + 1,
+          mode: mode,
         });
         array[y][x] = 0;
         if (!result) continue;

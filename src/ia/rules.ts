@@ -30,8 +30,8 @@ export const checkWin = (props: { array: number[][] }) => {
 
 export const checkTie = (props: { array: number[][] }) => {
   const { array } = props;
-  const aplanar = array.flatMap((a) => a);
-  if (aplanar.includes(0)) return false;
+  const flattenList = array.flatMap((a) => a);
+  if (flattenList.includes(0)) return false;
   else return true;
 };
 
@@ -46,7 +46,13 @@ export const openingPlay = (props: { array: number[][] }) => {
     if (index === -1) return;
     moveHuman = { x: index, y: i };
     if (moveHuman.x === 1 && moveHuman.y === 1) {
-      moveIa = { x: 2, y: 2 };
+      const getRamdom = () => {
+        const x = Math.floor(Math.random() * 3);
+        const y = Math.floor(Math.random() * 3);
+        if (!(x === 1 && y === 1)) return { x: x, y: y };
+        return getRamdom();
+      };
+      moveIa = getRamdom();
     } else {
       moveIa = { x: 1, y: 1 };
     }

@@ -1,7 +1,8 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { Cell } from "../Card";
-import { serializeBoard } from "../ia/seralizeBoard";
+import { serializeBoard } from "../ia/serializeBoard";
 import { miniMax } from "../ia/ia";
+import { modeEasy } from "../ia/modeEasy";
+import type { Cell } from "../type";
 type playProps = {
   turnPlayer?: boolean;
   setTurnPlayer: Dispatch<SetStateAction<boolean>>;
@@ -9,6 +10,7 @@ type playProps = {
   y?: number;
   board?: Cell[][];
   setBoard: Dispatch<SetStateAction<Cell[][]>>;
+  mode?: "impossible" | "medium" | "easy";
 };
 const playHuman = (props: playProps) => {
   const { board, setBoard, x, y, setTurnPlayer } = props;
@@ -25,22 +27,26 @@ const playHuman = (props: playProps) => {
 };
 
 const playIa = (props: playProps) => {
-  const { setBoard, setTurnPlayer } = props;
+  const { setBoard, setTurnPlayer, mode } = props;
+  if (!mode) return;
   setTimeout(() => {
     setBoard((count) => {
-      const tranformer = serializeBoard({ arrays: count });
-      const resIa = miniMax({ array: tranformer, shift: true });
+      const transformer = serializeBoard({ arrays: count });
+      let resIa: { x?: number; y?: number; score?: number };
+      if (mode !== "easy") {
+        resIa = miniMax({ array: transformer, shift: true, mode: mode });
+      } else resIa = modeEasy({ board: transformer });
       if (resIa.x === undefined || resIa.y === undefined) return count;
       const copyCount = count.map((c) => [...c]);
       copyCount[resIa.y][resIa.x] = "O";
       return copyCount;
     });
     setTurnPlayer(false);
-  }, 500);
+  }, 600);
 };
 
 export const addOption = (props: playProps) => {
-  const { x, y, setBoard, board, setTurnPlayer, turnPlayer } = props;
+  const { x, y, setBoard, board, setTurnPlayer, turnPlayer, mode } = props;
   const checker = playHuman({
     board: board,
     setBoard: setBoard,
@@ -53,5 +59,7 @@ export const addOption = (props: playProps) => {
   playIa({
     setBoard: setBoard,
     setTurnPlayer: setTurnPlayer,
+    mode: mode,
   });
+  return;
 };

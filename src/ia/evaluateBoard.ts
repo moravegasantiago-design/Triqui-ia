@@ -9,10 +9,15 @@ export const isCellEmpty = (props: propsCell) => {
   if (array[row][col] === 0) return true;
   else return false;
 };
-const evaluateBoard = (props: { array: number[][] }) => {
-  const { array } = props;
-  const opening = openingPlay({ array: array });
-  if (opening && opening.x !== -1) return opening;
+const evaluateBoard = (props: {
+  array: number[][];
+  mode: "impossible" | "medium";
+}) => {
+  const { array, mode } = props;
+  if (mode === "medium") {
+    const opening = openingPlay({ array: array });
+    if (opening && opening.x !== -1) return opening;
+  }
   const win = checkWin({ array: array });
   if (win) return win;
   return checkTie({ array: array }) === true ? 0 : -1;
