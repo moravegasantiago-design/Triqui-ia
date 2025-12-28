@@ -47,7 +47,6 @@ export default function Card() {
       gameMode: gameMode
     });
     if (!check) return;
-    console.log(check)
     const checkItems = check;
     setTimeout(() => {
       setGameStatus(checkItems);
@@ -57,7 +56,6 @@ export default function Card() {
     localStorage.setItem("playerStatistics", JSON.stringify(playerStatistics));
   }, [playerStatistics]);
   useEffect(() => {
-    console.log("Pip")
     addStatistics({setPlayerStatistics: setPlayerStatistics, gameStatus : gameStatus})
   }, [gameStatus])
   const mode = gameMode.mode === "friend" ? playerStatistics.pvp : playerStatistics;
@@ -131,7 +129,7 @@ const HeaderCard = (props: { playerStatistics :statisticsProps, gameMode: gameMo
           { mode ? playerStatistics.pvp.player1 : playerStatistics.wins}
         </p>
         <p className="text-[9px] sm:text-[11px] uppercase tracking-widest text-gray-500">
-          {mode?  "Jugador1" :"Tú"}
+          {mode ? "Jugador1" :"Tú"}
         </p>
       </div>
       <div className="px-3 py-1 sm:px-4 sm:py-2 bg-[#1a1a24] rounded-full">
@@ -154,12 +152,10 @@ const HeaderCard = (props: { playerStatistics :statisticsProps, gameMode: gameMo
 const TurnIndicator = (props: { turnPlayer: boolean; gameMode: gameModeProps }) => {
   const { turnPlayer, gameMode } = props;
   const isFriend = gameMode.mode === "friend";
-  
   let label: string;
   let colorClass: string;
-  
   if (isFriend) {
-    label = !turnPlayer ? "Turno: Jugador 1 (X)" : "Turno: Jugador 2 (O)";
+    label = !turnPlayer ? "Turno: Jugador 2 (O)" : "Turno: Jugador  (X)";
     colorClass = !turnPlayer 
       ? "bg-pink-500/10 text-pink-400 border-pink-500/20" 
       : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
