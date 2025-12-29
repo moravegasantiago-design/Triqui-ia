@@ -53,6 +53,7 @@ export default function Card() {
     }, 100);
   }, [board, gameMode]);
   useEffect(() => {
+    console.log(playerStatistics)
     localStorage.setItem("playerStatistics", JSON.stringify(playerStatistics));
   }, [playerStatistics]);
   useEffect(() => {

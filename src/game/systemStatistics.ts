@@ -25,8 +25,8 @@ export const updateStatistics = (props: winDraw) => {
   objCopy[parameter] += 1;
   if ("points" in objCopy) objCopy.points += points;
   if ("streak" in objCopy) {
-    if (parameter === "wins" && objCopy.streak) objCopy.streak += 1;
-    else if (parameter === "losses" && objCopy.streak) objCopy.streak = 0;
+    if (parameter === "wins") objCopy.streak += 1;
+    else if (parameter === "losses") objCopy.streak = 0;
   }
   objCopy.gameHistory = [...objCopy.gameHistory, letter];
   return objCopy;
