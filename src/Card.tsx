@@ -94,7 +94,7 @@ export default function Card() {
           {gameStatus.isDraw && (
             <DrawModal setBoard={setBoard} setGameStatus={setGameStatus} />
           )}
-          <MobileStatistics metricsPlayer={mode} points={playerStatistics.points} streak={playerStatistics.streak} />
+          <MobileStatistics metricsPlayer={mode} points={playerStatistics.points} streak={playerStatistics.streak} mode={gameMode.mode}/>
           <button
             className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-violet-600 to-purple-600 rounded-xl font-semibold text-xs 
           sm:text-sm hover:from-violet-500 hover:to-purple-500 active:scale-[0.98] transition-all shadow-lg shadow-violet-500/20"
@@ -157,8 +157,8 @@ const TurnIndicator = (props: { turnPlayer: boolean; gameMode: gameModeProps }) 
   if (isFriend) {
     label = !turnPlayer ? "Turno: Jugador 2 (O)" : "Turno: Jugador  (X)";
     colorClass = !turnPlayer 
-      ? "bg-pink-500/10 text-pink-400 border-pink-500/20" 
-      : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+      : "bg-pink-500/10 text-pink-400 border-pink-500/20";
   } else {
     label = turnPlayer ? "IA pensando..." : "Tu turno";
     colorClass = turnPlayer 
@@ -223,9 +223,9 @@ const BoardCard = (props: boardProps) => {
     </div>
   );
 };
-const StatsMobile = (props: { metricsPlayer: metricsProps }) => {
-  const { metricsPlayer } = props;
-  const {gameHistory, wins, losses, draw} = metricsPlayer
+const StatsMobile = (props: { metricsPlayer: metricsProps, mode: string} ) => {
+  const { metricsPlayer, mode } = props;
+  const {gameHistory, wins, losses, draw, player1, player2} = metricsPlayer
   return (
     <>
       <div className="bg-[#1a1a24] rounded-xl p-2 text-center">
@@ -238,18 +238,18 @@ const StatsMobile = (props: { metricsPlayer: metricsProps }) => {
       </div>
       <div className="bg-[#1a1a24] rounded-xl p-2 text-center">
         <p className="text-lg font-bold text-emerald-400">
-          {wins}
+          {mode === "friend" ? player1 : wins}
         </p>
         <p className="text-[7px] uppercase tracking-wider text-gray-500">
-          Victorias
+          {mode === "friend" ? "Jugador1" : "Victorias"}
         </p>
       </div>
       <div className="bg-[#1a1a24] rounded-xl p-2 text-center">
         <p className="text-lg font-bold text-pink-400">
-          {losses}
+          {mode === "friend" ? player2 : losses}
         </p>
         <p className="text-[7px] uppercase tracking-wider text-gray-500">
-          Derrotas
+          {mode === "friend" ? "Jugador1" : "Derrotas"}
         </p>
       </div>
       <div className="bg-[#1a1a24] rounded-xl p-2 text-center">
@@ -666,13 +666,13 @@ const victotyPlayers = (player1 || 0) + (player2 || 0);
     </>
   );
 };
-const MobileStatistics = (props: { metricsPlayer : metricsProps, points: number, streak:number }) => {
-  const { metricsPlayer, points, streak } = props;
+const MobileStatistics = (props: { metricsPlayer : metricsProps, points: number, streak:number, mode:string }) => {
+  const { metricsPlayer, points, streak, mode } = props;
   const {gameHistory} = metricsPlayer
   return (
     <>
       <div className="grid grid-cols-4 gap-1.5 sm:hidden">
-        <StatsMobile metricsPlayer={metricsPlayer} />
+        <StatsMobile metricsPlayer={metricsPlayer} mode ={mode}/>
       </div>
 
       <div className="flex gap-1.5 sm:hidden">
